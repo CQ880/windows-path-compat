@@ -1,0 +1,52 @@
+name: Windows path smoke test
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Pass on every path
+        id: passed
+        uses: ./
+        with:
+          mode: file
+          fixture: examples/sample.txt
+          report: pass-report.json
+          command-json: '["python", "{workspace}/examples/check_text.py", "{input}"]'
+      - name: Fail on Unicode paths
+        id: difference
+        continue-on-error: true
+        uses: ./
+        with:
+          mode: file
+          fixture: examples/sample.txt
+          report: difference-report.json
+          command-json: '["python", "{workspace}/examples/check_text.py", "{input}", "--fail-on-unicode"]'
+      - name: Assert both Action outcomes
+        shell: pwsh
+        env:
+          PASS_CODE: ${{ steps.passed.outputs.exit-code }}
+          DIFFERENCE_CODE: ${{ steps.difference.outputs.exit-code }}
+          DIFFERENCE_OUTCOME: ${{ steps.difference.outcome }}
+        run: |
+          if ($env:PASS_CODE -ne '0' -or $env:DIFFERENCE_CODE -ne '1' -or $env:DIFFERENCE_OUTCOME -ne 'failure') {
+            throw 'Expected the healthy Action to pass and the Unicode regression Action to fail'
+          }
+          $pass = Get-Content -LiteralPath 'pass-report.json' -Raw | ConvertFrom-Json
+          $diff = Get-Content -LiteralPath 'difference-report.json' -Raw | ConvertFrom-Json
+          if ($pass.cases.Count -ne 10 -or $diff.cases.Count -ne 10 -or @($diff.cases | Where-Object path_difference).Count -ne 6) {
+            throw 'Unexpected test counts in the JSON reports'
+          }

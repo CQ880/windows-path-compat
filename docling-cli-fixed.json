@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "mode": "file",
+  "command": [
+    "<lab>\\fixed\\Scripts\\python.exe",
+    "-B",
+    "<lab>\\check_pdf.py",
+    "{input}"
+  ],
+  "fixture": "<lab>\\plain\\sample.pdf",
+  "timeout_seconds": 30.0,
+  "workspace": "<lab>\\winpath-bmf3rcg2",
+  "workspace_removed": true,
+  "errors": [],
+  "cases": [
+    {
+      "scenario": "file-parent",
+      "variant": "ascii",
+      "cwd": "<lab>\\winpath-bmf3rcg2\\file-parent\\ascii\\run",
+      "input": "<lab>\\winpath-bmf3rcg2\\file-parent\\ascii\\sample\\sample.pdf",
+      "argv": [
+        "<lab>\\fixed\\Scripts\\python.exe",
+        "-B",
+        "<lab>\\check_pdf.py",
+        "<lab>\\winpath-bmf3rcg2\\file-parent\\ascii\\sample\\sample.pdf"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 2.344,
+      "stdout_tail": "{\"docling_parse\": \"7.16.0\", \"pages\": 1}\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-parent",
+      "variant": "space",
+      "cwd": "<lab>\\winpath-bmf3rcg2\\file-parent\\space\\run",
+      "input": "<lab>\\winpath-bmf3rcg2\\file-parent\\space\\sample project\\sample.pdf",
+      "argv": [
+        "<lab>\\fixed\\Scripts\\python.exe",
+        "-B",
+        "<lab>\\check_pdf.py",
+        "<lab>\\winpath-bmf3rcg2\\file-parent\\space\\sample project\\sample.pdf"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 1.766,
+      "stdout_tail": "{\"docling_parse\": \"7.16.0\", \"pages\": 1}\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-parent",
+      "variant": "cjk",
+      "cwd": "<lab>\\winpath-bmf3rcg2\\file-parent\\cjk\\run",
+      "input": "<lab>\\winpath-bmf3rcg2\\file-parent\\cjk\\\u6d4b\u8bd5\u76ee\u5f55\\sample.pdf",
+      "argv": [
+        "<lab>\\fixed\\Scripts\\python.exe",
+        "-B",
+        "<lab>\\check_pdf.py",
+        "<lab>\\winpath-bmf3rcg2\\file-parent\\cjk\\\u6d4b\u8bd5\u76ee\u5f55\\sample.pdf"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 1.75,
+      "stdout_tail": "{\"docling_parse\": \"7.16.0\", \"pages\": 1}\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-parent",
+      "variant": "accent",
+      "cwd": "<lab>\\winpath-bmf3rcg2\\file-parent\\accent\\run",
+      "input": "<lab>\\winpath-bmf3rcg2\\file-parent\\accent\\caf\u00e9\\sample.pdf",
+      "argv": [
+        "<lab>\\fixed\\Scripts\\python.exe",
+        "-B",
+        "<lab>\\check_pdf.py",
+        "<lab>\\winpath-bmf3rcg2\\file-parent\\accent\\caf\u00e9\\sample.pdf"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 1.688,
+      "stdout_tail": "{\"docling_parse\": \"7.16.0\", \"pages\": 1}\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-parent",
+      "variant": "cjk-space",
+      "cwd": "<lab>\\winpath-bmf3rcg2\\file-parent\\cjk-space\\run",
+      "input": "<lab>\\winpath-bmf3rcg2\\file-parent\\cjk-space\\\u6d4b\u8bd5 \u9879\u76ee\\sample.pdf",
+      "argv": [
+        "<lab>\\fixed\\Scripts\\python.exe",
+        "-B",
+        "<lab>\\check_pdf.py",
+        "<lab>\\winpath-bmf3rcg2\\file-parent\\cjk-space\\\u6d4b\u8bd5 \u9879\u76ee\\sample.pdf"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 1.703,
+      "stdout_tail": "{\"docling_parse\": \"7.16.0\", \"pages\": 1}\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-name",
+      "variant": "ascii",
+      "cwd": "<lab>\\winpath-bmf3rcg2\\file-name\\ascii\\run",
+      "input": "<lab>\\winpath-bmf3rcg2\\file-name\\ascii\\run\\sample.pdf",
+      "argv": [
+        "<lab>\\fixed\\Scripts\\python.exe",
+        "-B",
+        "<lab>\\check_pdf.py",
+        "<lab>\\winpath-bmf3rcg2\\file-name\\ascii\\run\\sample.pdf"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 1.719,
+      "stdout_tail": "{\"docling_parse\": \"7.16.0\", \"pages\": 1}\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-name",
+      "variant": "space",
+      "cwd": "<lab>\\winpath-bmf3rcg2\\file-name\\space\\run",
+      "input": "<lab>\\winpath-bmf3rcg2\\file-name\\space\\run\\sample project.pdf",
+      "argv": [
+        "<lab>\\fixed\\Scripts\\python.exe",
+        "-B",
+        "<lab>\\check_pdf.py",
+        "<lab>\\winpath-bmf3rcg2\\file-name\\space\\run\\sample project.pdf"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 1.688,
+      "stdout_tail": "{\"docling_parse\": \"7.16.0\", \"pages\": 1}\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-name",
+      "variant": "cjk",
+      "cwd": "<lab>\\winpath-bmf3rcg2\\file-name\\cjk\\run",
+      "input": "<lab>\\winpath-bmf3rcg2\\file-name\\cjk\\run\\\u6d4b\u8bd5\u76ee\u5f55.pdf",
+      "argv": [
+        "<lab>\\fixed\\Scripts\\python.exe",
+        "-B",
+        "<lab>\\check_pdf.py",
+        "<lab>\\winpath-bmf3rcg2\\file-name\\cjk\\run\\\u6d4b\u8bd5\u76ee\u5f55.pdf"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 1.688,
+      "stdout_tail": "{\"docling_parse\": \"7.16.0\", \"pages\": 1}\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-name",
+      "variant": "accent",
+      "cwd": "<lab>\\winpath-bmf3rcg2\\file-name\\accent\\run",
+      "input": "<lab>\\winpath-bmf3rcg2\\file-name\\accent\\run\\caf\u00e9.pdf",
+      "argv": [
+        "<lab>\\fixed\\Scripts\\python.exe",
+        "-B",
+        "<lab>\\check_pdf.py",
+        "<lab>\\winpath-bmf3rcg2\\file-name\\accent\\run\\caf\u00e9.pdf"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 1.672,
+      "stdout_tail": "{\"docling_parse\": \"7.16.0\", \"pages\": 1}\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-name",
+      "variant": "cjk-space",
+      "cwd": "<lab>\\winpath-bmf3rcg2\\file-name\\cjk-space\\run",
+      "input": "<lab>\\winpath-bmf3rcg2\\file-name\\cjk-space\\run\\\u6d4b\u8bd5 \u9879\u76ee.pdf",
+      "argv": [
+        "<lab>\\fixed\\Scripts\\python.exe",
+        "-B",
+        "<lab>\\check_pdf.py",
+        "<lab>\\winpath-bmf3rcg2\\file-name\\cjk-space\\run\\\u6d4b\u8bd5 \u9879\u76ee.pdf"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 1.687,
+      "stdout_tail": "{\"docling_parse\": \"7.16.0\", \"pages\": 1}\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    }
+  ],
+  "exit_code": 0
+}

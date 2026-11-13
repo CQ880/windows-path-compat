@@ -1,0 +1,98 @@
+{
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "python": "3.12.14",
+  "probe_script": "check_pdf.py",
+  "source": "https://pypi.org/project/docling-parse/",
+  "dependencies": [
+    "annotated-doc==0.0.6",
+    "annotated-types==0.8.0",
+    "attrs==26.1.0",
+    "certifi==2026.10.23",
+    "charset-normalizer==3.5.2",
+    "colorama==0.4.6",
+    "defusedxml==0.7.1",
+    "doclang==0.9.0",
+    "docling-core==2.106.0",
+    "idna==3.20",
+    "jsonref==1.1.0",
+    "jsonschema==4.26.0",
+    "jsonschema-specifications==2025.9.1",
+    "latex2mathml==3.81.1",
+    "lxml==6.1.3",
+    "markdown-it-py==4.3.0",
+    "mdurl==0.1.2",
+    "numpy==2.5.4",
+    "pandas==3.1.1",
+    "pillow==12.3.0",
+    "pydantic==2.14.3",
+    "pydantic-settings==2.16.2",
+    "pydantic_core==2.50.4",
+    "Pygments==2.21.0",
+    "python-dateutil==4.0.0",
+    "python-dotenv==1.2.4",
+    "pywin32==312",
+    "PyYAML==6.0.3",
+    "referencing==0.37.0",
+    "requests==2.34.2",
+    "rich==15.0.0",
+    "rpds-py==2026.9.1",
+    "shellingham==1.5.4",
+    "tabulate==0.10.0",
+    "typer==0.27.3",
+    "typing-inspection==0.4.5",
+    "typing_extensions==4.16.0",
+    "tzdata==2026.6",
+    "urllib3==2.8.0"
+  ],
+  "results": [
+    {
+      "version": "7.15.0",
+      "case": "ascii",
+      "exit_code": 0,
+      "fixture_sha256": "ad3e0c18ec117e346163124e2d871c2aac461f4b930bb50cd5c2c4767e07bc50",
+      "fixture": "plain/sample.pdf",
+      "interpreter": "old/Scripts/python.exe",
+      "probe": {
+        "docling_parse": "7.15.0",
+        "pages": 1
+      }
+    },
+    {
+      "version": "7.15.0",
+      "case": "cjk",
+      "exit_code": 1,
+      "fixture_sha256": "ad3e0c18ec117e346163124e2d871c2aac461f4b930bb50cd5c2c4767e07bc50",
+      "fixture": "\u6d4b\u8bd5\u76ee\u5f55/sample.pdf",
+      "interpreter": "old/Scripts/python.exe",
+      "probe": {
+        "docling_parse": "7.15.0",
+        "error": "Failed to load document with key key=<lab>\\\u6d4b\u8bd5\u76ee\u5f55\\sample.pdf"
+      }
+    },
+    {
+      "version": "7.16.0",
+      "case": "ascii",
+      "exit_code": 0,
+      "fixture_sha256": "ad3e0c18ec117e346163124e2d871c2aac461f4b930bb50cd5c2c4767e07bc50",
+      "fixture": "plain/sample.pdf",
+      "interpreter": "fixed/Scripts/python.exe",
+      "probe": {
+        "docling_parse": "7.16.0",
+        "pages": 1
+      }
+    },
+    {
+      "version": "7.16.0",
+      "case": "cjk",
+      "exit_code": 0,
+      "fixture_sha256": "ad3e0c18ec117e346163124e2d871c2aac461f4b930bb50cd5c2c4767e07bc50",
+      "fixture": "\u6d4b\u8bd5\u76ee\u5f55/sample.pdf",
+      "interpreter": "fixed/Scripts/python.exe",
+      "probe": {
+        "docling_parse": "7.16.0",
+        "pages": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+name: Windows Path Compatibility Tests
+description: Run a test command against Windows path variants
+inputs:
+  mode:
+    description: Test file paths or the working directory
+    required: true
+  command-json:
+    description: JSON array containing the executable and each argument
+    required: true
+  fixture:
+    description: File to copy into each test case
+    default: ''
+  root:
+    description: Writable ASCII directory without whitespace, defaults to the system temp directory
+    default: ''
+  timeout:
+    description: Timeout in seconds per case
+    default: '30'
+  report:
+    description: Output JSON path in an existing directory
+    default: winpath-report.json
+outputs:
+  exit-code:
+    description: Exit code from winpath.py
+    value: ${{ steps.test.outputs.exit-code }}
+runs:
+  using: composite
+  steps:
+    - name: Test Windows paths
+      id: test
+      shell: pwsh
+      env:
+        WINPATH_ACTION_PATH: ${{ github.action_path }}
+        WINPATH_MODE: ${{ inputs.mode }}
+        WINPATH_COMMAND: ${{ inputs.command-json }}
+        WINPATH_FIXTURE: ${{ inputs.fixture }}
+        WINPATH_ROOT: ${{ inputs.root }}
+        WINPATH_TIMEOUT: ${{ inputs.timeout }}
+        WINPATH_REPORT: ${{ inputs.report }}
+      run: |
+        & (Join-Path $env:WINPATH_ACTION_PATH 'run-action.ps1')
+        exit $LASTEXITCODE

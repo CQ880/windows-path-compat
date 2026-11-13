@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "mode": "file",
+  "command": [
+    "<lab>\\jq-windows-amd64.exe",
+    "-e",
+    ".windows_path_test.answer == 42",
+    "{input}"
+  ],
+  "fixture": "<project>\\examples\\sample.json",
+  "timeout_seconds": 30.0,
+  "workspace": "<lab>\\winpath-lprgng31",
+  "workspace_removed": true,
+  "errors": [],
+  "cases": [
+    {
+      "scenario": "file-parent",
+      "variant": "ascii",
+      "cwd": "<lab>\\winpath-lprgng31\\file-parent\\ascii\\run",
+      "input": "<lab>\\winpath-lprgng31\\file-parent\\ascii\\sample\\sample.json",
+      "argv": [
+        "<lab>\\jq-windows-amd64.exe",
+        "-e",
+        ".windows_path_test.answer == 42",
+        "<lab>\\winpath-lprgng31\\file-parent\\ascii\\sample\\sample.json"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 0.016,
+      "stdout_tail": "true\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-parent",
+      "variant": "space",
+      "cwd": "<lab>\\winpath-lprgng31\\file-parent\\space\\run",
+      "input": "<lab>\\winpath-lprgng31\\file-parent\\space\\sample project\\sample.json",
+      "argv": [
+        "<lab>\\jq-windows-amd64.exe",
+        "-e",
+        ".windows_path_test.answer == 42",
+        "<lab>\\winpath-lprgng31\\file-parent\\space\\sample project\\sample.json"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 0.015,
+      "stdout_tail": "true\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-parent",
+      "variant": "cjk",
+      "cwd": "<lab>\\winpath-lprgng31\\file-parent\\cjk\\run",
+      "input": "<lab>\\winpath-lprgng31\\file-parent\\cjk\\\u6d4b\u8bd5\u76ee\u5f55\\sample.json",
+      "argv": [
+        "<lab>\\jq-windows-amd64.exe",
+        "-e",
+        ".windows_path_test.answer == 42",
+        "<lab>\\winpath-lprgng31\\file-parent\\cjk\\\u6d4b\u8bd5\u76ee\u5f55\\sample.json"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 0.016,
+      "stdout_tail": "true\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-parent",
+      "variant": "accent",
+      "cwd": "<lab>\\winpath-lprgng31\\file-parent\\accent\\run",
+      "input": "<lab>\\winpath-lprgng31\\file-parent\\accent\\caf\u00e9\\sample.json",
+      "argv": [
+        "<lab>\\jq-windows-amd64.exe",
+        "-e",
+        ".windows_path_test.answer == 42",
+        "<lab>\\winpath-lprgng31\\file-parent\\accent\\caf\u00e9\\sample.json"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 0.015,
+      "stdout_tail": "true\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-parent",
+      "variant": "cjk-space",
+      "cwd": "<lab>\\winpath-lprgng31\\file-parent\\cjk-space\\run",
+      "input": "<lab>\\winpath-lprgng31\\file-parent\\cjk-space\\\u6d4b\u8bd5 \u9879\u76ee\\sample.json",
+      "argv": [
+        "<lab>\\jq-windows-amd64.exe",
+        "-e",
+        ".windows_path_test.answer == 42",
+        "<lab>\\winpath-lprgng31\\file-parent\\cjk-space\\\u6d4b\u8bd5 \u9879\u76ee\\sample.json"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 0.016,
+      "stdout_tail": "true\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-name",
+      "variant": "ascii",
+      "cwd": "<lab>\\winpath-lprgng31\\file-name\\ascii\\run",
+      "input": "<lab>\\winpath-lprgng31\\file-name\\ascii\\run\\sample.json",
+      "argv": [
+        "<lab>\\jq-windows-amd64.exe",
+        "-e",
+        ".windows_path_test.answer == 42",
+        "<lab>\\winpath-lprgng31\\file-name\\ascii\\run\\sample.json"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 0.015,
+      "stdout_tail": "true\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-name",
+      "variant": "space",
+      "cwd": "<lab>\\winpath-lprgng31\\file-name\\space\\run",
+      "input": "<lab>\\winpath-lprgng31\\file-name\\space\\run\\sample project.json",
+      "argv": [
+        "<lab>\\jq-windows-amd64.exe",
+        "-e",
+        ".windows_path_test.answer == 42",
+        "<lab>\\winpath-lprgng31\\file-name\\space\\run\\sample project.json"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 0.016,
+      "stdout_tail": "true\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-name",
+      "variant": "cjk",
+      "cwd": "<lab>\\winpath-lprgng31\\file-name\\cjk\\run",
+      "input": "<lab>\\winpath-lprgng31\\file-name\\cjk\\run\\\u6d4b\u8bd5\u76ee\u5f55.json",
+      "argv": [
+        "<lab>\\jq-windows-amd64.exe",
+        "-e",
+        ".windows_path_test.answer == 42",
+        "<lab>\\winpath-lprgng31\\file-name\\cjk\\run\\\u6d4b\u8bd5\u76ee\u5f55.json"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 0.016,
+      "stdout_tail": "true\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-name",
+      "variant": "accent",
+      "cwd": "<lab>\\winpath-lprgng31\\file-name\\accent\\run",
+      "input": "<lab>\\winpath-lprgng31\\file-name\\accent\\run\\caf\u00e9.json",
+      "argv": [
+        "<lab>\\jq-windows-amd64.exe",
+        "-e",
+        ".windows_path_test.answer == 42",
+        "<lab>\\winpath-lprgng31\\file-name\\accent\\run\\caf\u00e9.json"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 0.015,
+      "stdout_tail": "true\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    },
+    {
+      "scenario": "file-name",
+      "variant": "cjk-space",
+      "cwd": "<lab>\\winpath-lprgng31\\file-name\\cjk-space\\run",
+      "input": "<lab>\\winpath-lprgng31\\file-name\\cjk-space\\run\\\u6d4b\u8bd5 \u9879\u76ee.json",
+      "argv": [
+        "<lab>\\jq-windows-amd64.exe",
+        "-e",
+        ".windows_path_test.answer == 42",
+        "<lab>\\winpath-lprgng31\\file-name\\cjk-space\\run\\\u6d4b\u8bd5 \u9879\u76ee.json"
+      ],
+      "child_exit_code": 0,
+      "status": "passed",
+      "seconds": 0.015,
+      "stdout_tail": "true\r\n",
+      "stdout_truncated": false,
+      "stderr_tail": "",
+      "stderr_truncated": false,
+      "path_difference": false
+    }
+  ],
+  "exit_code": 0
+}
