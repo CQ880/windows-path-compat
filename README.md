@@ -63,6 +63,6 @@ python winpath.py --mode file --fixture sample.pdf --json docling-result.json --
     command-json: '["python", "{workspace}/examples/check_text.py", "{input}"]'
 ~~~
 
-工作流 [smoke.yml](.github/workflows/smoke.yml) 检查正常用例和刻意触发的 Unicode 路径失败。该入口已在本机 PowerShell 验证，GitHub 托管运行待执行。
+工作流 [smoke.yml](.github/workflows/smoke.yml) 已在 GitHub 托管的 Windows runner 上通过。正常组退出 0，故障组识别出六个 Unicode 路径差异并退出 1，最终断言通过。 [托管运行](https://github.com/CQ880/windows-path-compat/actions/runs/43420519010)
 
 英文使用说明见 [README.en.md](README.en.md)。
