@@ -65,4 +65,6 @@ python winpath.py --mode file --fixture sample.pdf --json docling-result.json --
 
 工作流 [smoke.yml](.github/workflows/smoke.yml) 已在 GitHub 托管的 Windows runner 上通过。正常组退出 0，故障组识别出六个 Unicode 路径差异并退出 1，最终断言通过。 [托管运行](https://github.com/CQ880/windows-path-compat/actions/runs/43420519010)
 
+[Docling 示例工作流](.github/workflows/docling-pilot.yml) 可手动运行，在 Windows 上对照 7.15.0 和 7.16.0，验证 PDF 页数与路径差异。维护者可以用同样的接入方式检查自己发布的 Windows 构建。
+
 英文使用说明见 [README.en.md](README.en.md)。

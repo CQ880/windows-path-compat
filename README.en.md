@@ -28,3 +28,5 @@ Add `--keep` before the `--` separator to retain case files and replay using the
 The Docling reports show the original Unicode path failure in [7.15.0](docling-cli-old.json) and the passing run in [7.16.0](docling-cli-fixed.json). The [jq 1.8.2 report](jq-cli.json) records ten passing file checks with an assertion on the parsed value.
 
 For GitHub Actions, check out the caller repository and set up Python 3.12 in a Windows job before calling the composite action. Provide the command as a JSON array. The action expands `{workspace}` in arguments to the caller's workspace. The [example workflow](.github/workflows/smoke.yml) passed on a GitHub-hosted Windows runner. It verified exit 0 for the healthy probe and exit 1 with six path differences for the deliberately failing probe. [Hosted run](https://github.com/CQ880/windows-path-compat/actions/runs/43420519010)
+
+Run the [Docling example workflow](.github/workflows/docling-pilot.yml) manually to compare versions 7.15.0 and 7.16.0 on Windows. It checks the parsed page count and the known path regression. Adapt the same pattern to test your own Windows builds.

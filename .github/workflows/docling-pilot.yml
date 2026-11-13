@@ -1,0 +1,85 @@
+name: Docling Windows regression example
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/docling-pilot.yml'
+      - 'examples/check_pdf.py'
+      - 'examples/make_pdf.py'
+
+permissions:
+  contents: read
+
+jobs:
+  docling:
+    name: docling-parse ${{ matrix.version }}
+    runs-on: windows-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - version: '7.15.0'
+            expected: '1'
+          - version: '7.16.0'
+            expected: '0'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install parser and create fixture
+        shell: pwsh
+        env:
+          DOCLING_VERSION: ${{ matrix.version }}
+        run: |
+          python -m pip install --only-binary=:all: "docling-parse==$env:DOCLING_VERSION"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python examples/make_pdf.py sample.pdf
+          exit $LASTEXITCODE
+      - name: Check file paths
+        id: probe
+        continue-on-error: true
+        uses: ./
+        with:
+          mode: file
+          fixture: sample.pdf
+          report: docling-paths.json
+          command-json: '["python", "{workspace}/examples/check_pdf.py", "{input}"]'
+      - name: Verify parser results
+        shell: pwsh
+        env:
+          EXPECTED: ${{ matrix.expected }}
+          OBSERVED: ${{ steps.probe.outputs.exit-code }}
+          OUTCOME: ${{ steps.probe.outcome }}
+          DOCLING_VERSION: ${{ matrix.version }}
+        run: |
+          $expectedOutcome = if ($env:EXPECTED -eq '0') { 'success' } else { 'failure' }
+          if ($env:OBSERVED -ne $env:EXPECTED -or $env:OUTCOME -ne $expectedOutcome) {
+            throw "Docling $env:DOCLING_VERSION returned $env:OBSERVED, expected $env:EXPECTED"
+          }
+          $report = Get-Content -Raw -LiteralPath 'docling-paths.json' | ConvertFrom-Json
+          if ($report.cases.Count -ne 10) { throw 'Expected ten path cases' }
+          $controls = @($report.cases | Where-Object variant -eq ascii)
+          if ($controls.Count -ne 2 -or @($controls | Where-Object status -ne passed).Count) {
+            throw 'Both ASCII controls must parse the PDF'
+          }
+          $passed = @($report.cases | Where-Object status -eq passed)
+          foreach ($case in $passed) {
+            $parsed = $case.stdout_tail | ConvertFrom-Json
+            if ($parsed.pages -ne 1 -or $parsed.docling_parse -ne $env:DOCLING_VERSION) {
+              throw 'Expected one parsed page from the pinned parser version'
+            }
+          }
+          $cjk = @($report.cases | Where-Object variant -eq cjk)
+          if ($env:EXPECTED -eq '1' -and
+              ($cjk.Count -ne 2 -or @($cjk | Where-Object path_difference).Count -ne 2)) {
+            throw 'Expected the known regression in both CJK cases'
+          }
+          if ($env:EXPECTED -eq '0' -and $passed.Count -ne 10) {
+            throw 'Expected all ten cases to parse on the fixed version'
+          }
+          "$env:DOCLING_VERSION passed $($passed.Count)/10 path cases, exit $env:OBSERVED"
