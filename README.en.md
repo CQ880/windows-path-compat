@@ -29,4 +29,17 @@ The Docling reports show the original Unicode path failure in [7.15.0](docling-c
 
 For GitHub Actions, check out the caller repository and set up Python 3.12 in a Windows job before calling the composite action. Provide the command as a JSON array. The action expands `{workspace}` in arguments to the caller's workspace. The [example workflow](.github/workflows/smoke.yml) passed on a GitHub-hosted Windows runner. It verified exit 0 for the healthy probe and exit 1 with six path differences for the deliberately failing probe. [Hosted run](https://github.com/CQ880/windows-path-compat/actions/runs/43420519010)
 
+Point the action at a fixture and test script checked into your repository.
+
+~~~yaml
+- uses: CQ880/windows-path-compat@v0.1.0
+  with:
+    mode: file
+    fixture: examples/sample.txt
+    report: winpath-report.json
+    command-json: '["python", "{workspace}/examples/check_text.py", "{input}"]'
+~~~
+
 Run the [Docling example workflow](.github/workflows/docling-pilot.yml) manually to compare versions 7.15.0 and 7.16.0 on Windows. It checks the parsed page count and the known path regression. Adapt the same pattern to test your own Windows builds.
+
+This project uses the [MIT license](LICENSE).

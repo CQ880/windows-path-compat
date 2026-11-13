@@ -52,10 +52,10 @@ python winpath.py --mode file --fixture sample.pdf --json docling-result.json --
 
 ## GitHub Actions 接入
 
-在 Windows job 中先 checkout 调用方仓库并配置 Python 3.12，再调用本 Action。同仓库可用下例。跨仓库使用时，把 `./` 换成发布仓库及版本引用。测试脚本路径中的 `{workspace}` 由 Action 替换为调用方工作区。
+在 Windows job 中先 checkout 调用方仓库并配置 Python 3.12，再调用本 Action。测试脚本路径中的 `{workspace}` 由 Action 替换为调用方工作区。示例里的样例文件和测试脚本应位于调用方仓库中。在本仓库测试修改时，可用 `uses: ./`。
 
 ~~~yaml
-- uses: ./
+- uses: CQ880/windows-path-compat@v0.1.0
   with:
     mode: file
     fixture: examples/sample.txt
@@ -68,3 +68,5 @@ python winpath.py --mode file --fixture sample.pdf --json docling-result.json --
 [Docling 示例工作流](.github/workflows/docling-pilot.yml) 可手动运行，在 Windows 上对照 7.15.0 和 7.16.0，验证 PDF 页数与路径差异。维护者可以用同样的接入方式检查自己发布的 Windows 构建。
 
 英文使用说明见 [README.en.md](README.en.md)。
+
+本项目采用 [MIT 许可证](LICENSE)。
