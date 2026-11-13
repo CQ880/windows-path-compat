@@ -42,4 +42,19 @@ Point the action at a fixture and test script checked into your repository.
 
 Run the [Docling example workflow](.github/workflows/docling-pilot.yml) manually to compare versions 7.15.0 and 7.16.0 on Windows. It checks the parsed page count and the known path regression. Adapt the same pattern to test your own Windows builds.
 
+## Codex App Server path checks
+
+The [Codex probe](examples/check_codex_paths.py) calls `fs/readDirectory` and `fs/readFile` over local stdio with a temporary Codex configuration directory. Use the native Codex CLI or the standalone App Server on Windows. The filesystem requests require no account or API key. [App Server filesystem documentation](https://learn.chatgpt.com/docs/app-server#filesystem)
+
+Run from this repository in PowerShell. Set `$server` to the executable you want to test. If needed, pass an existing writable ASCII directory without spaces to `winpath.py` with `--root`.
+
+~~~powershell
+$server = (Resolve-Path 'C:/codex/codex-app-server-x86_64-pc-windows-msvc.exe').Path
+$probe = (Resolve-Path 'examples/check_codex_paths.py').Path
+python winpath.py --mode file --fixture examples/sample.txt --timeout 40 --json codex-paths.json -- python $probe --server $server --file '{input}'
+python $probe --server $server --collision
+~~~
+
+Official App Server 0.169.0 passed all ten ordinary file path checks. On a volume supporting these native names, the collision check creates two files. One name has an unpaired UTF-16 surrogate and the other contains U+FFFD. The tested server returned the same name for both, and reading that name loaded the U+FFFD file. The collision check returns `1` for a misleading name, `0` if the server rejects the listing or omits the unrepresentable entry, and `2` for an inconclusive run. [Upstream issue #60916](https://github.com/openai/codex/issues/60916)
+
 This project uses the [MIT license](LICENSE).
