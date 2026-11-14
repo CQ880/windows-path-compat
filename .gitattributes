@@ -1,0 +1,2 @@
+# Preserve the bytes of the report downloaded from the hosted run.
+/codex-regression-hosted-0.169.0.json -text

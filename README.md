@@ -80,7 +80,9 @@ python codex_regression.py --server $server --report codex-regression.json
 
 报告包含 Codex 版本、常规路径结果和文件名冲突结果，可在核对内容后分享。退出码 `0` 表示常规路径均通过且未发现误导性文件名，`1` 表示发现路径差异或误导性文件名，`2` 表示结果不完整。可用 `python examples/check_codex_paths.py --server $server --collision` 单独测试冲突。
 
-官方 App Server 0.169.0 在本机通过全部 10 组常规路径。在 NTFS 上，一个含未配对 UTF-16 代理码元的原生文件名会被返回成 U+FFFD，与旁边的有效文件重名。按返回的名字读取会得到那个有效文件的内容。手动运行 [Codex 工作流](.github/workflows/codex-paths.yml) 可用固定的官方版本在 Windows runner 上验证这项基准。 [上游 Issue #60916](https://github.com/openai/codex/issues/60916)
+官方 App Server 0.169.0 在本机和 GitHub 托管的 Windows Server 2025 上均通过 10 组常规路径。两次测试均复现了同名和错读。在 NTFS 上，含未配对 UTF-16 代理码元的文件名被返回成 U+FFFD。目录中存在同名的有效文件时，两条记录都会读到该有效文件。托管工作流核对了这些预期结果。 [托管运行](https://github.com/CQ880/windows-path-compat/actions/runs/43561072739) · [托管报告](codex-regression-hosted-0.169.0.json) · [上游 Issue #60916](https://github.com/openai/codex/issues/60916)
+
+在 `codex-windows-probe` 分支推送代码可触发 [Codex 工作流](.github/workflows/codex-paths.yml)，用固定的官方发行版复跑这项基准。
 
 英文使用说明见 [README.en.md](README.en.md)。
 

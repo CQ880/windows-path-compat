@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "platform": "Windows-2025Server-10.0.26100-SP0",
+  "machine": "AMD64",
+  "python_version": "3.12.10",
+  "exit_code": 1,
+  "server_version": "codex-app-server 0.169.0",
+  "ordinary_paths": {
+    "exit_code": 0,
+    "cases": [
+      {
+        "scenario": "file-parent",
+        "variant": "ascii",
+        "status": "passed",
+        "child_exit_code": 0,
+        "path_difference": false,
+        "exact_name_count": 1,
+        "content_matches": true
+      },
+      {
+        "scenario": "file-parent",
+        "variant": "space",
+        "status": "passed",
+        "child_exit_code": 0,
+        "path_difference": false,
+        "exact_name_count": 1,
+        "content_matches": true
+      },
+      {
+        "scenario": "file-parent",
+        "variant": "cjk",
+        "status": "passed",
+        "child_exit_code": 0,
+        "path_difference": false,
+        "exact_name_count": 1,
+        "content_matches": true
+      },
+      {
+        "scenario": "file-parent",
+        "variant": "accent",
+        "status": "passed",
+        "child_exit_code": 0,
+        "path_difference": false,
+        "exact_name_count": 1,
+        "content_matches": true
+      },
+      {
+        "scenario": "file-parent",
+        "variant": "cjk-space",
+        "status": "passed",
+        "child_exit_code": 0,
+        "path_difference": false,
+        "exact_name_count": 1,
+        "content_matches": true
+      },
+      {
+        "scenario": "file-name",
+        "variant": "ascii",
+        "status": "passed",
+        "child_exit_code": 0,
+        "path_difference": false,
+        "exact_name_count": 1,
+        "content_matches": true
+      },
+      {
+        "scenario": "file-name",
+        "variant": "space",
+        "status": "passed",
+        "child_exit_code": 0,
+        "path_difference": false,
+        "exact_name_count": 1,
+        "content_matches": true
+      },
+      {
+        "scenario": "file-name",
+        "variant": "cjk",
+        "status": "passed",
+        "child_exit_code": 0,
+        "path_difference": false,
+        "exact_name_count": 1,
+        "content_matches": true
+      },
+      {
+        "scenario": "file-name",
+        "variant": "accent",
+        "status": "passed",
+        "child_exit_code": 0,
+        "path_difference": false,
+        "exact_name_count": 1,
+        "content_matches": true
+      },
+      {
+        "scenario": "file-name",
+        "variant": "cjk-space",
+        "status": "passed",
+        "child_exit_code": 0,
+        "path_difference": false,
+        "exact_name_count": 1,
+        "content_matches": true
+      }
+    ]
+  },
+  "filename_collision": {
+    "exit_code": 1,
+    "actual_names_escaped": [
+      "bad\\ud800.txt",
+      "bad\\ufffd.txt"
+    ],
+    "single_file_control_passed": true,
+    "without_replacement_sibling": {
+      "returned_names_escaped": [
+        "bad\\ufffd.txt"
+      ],
+      "alias_read": "rpc-error",
+      "rpc_error_code": -32603
+    },
+    "returned_names_escaped": [
+      "bad\\ufffd.txt",
+      "bad\\ufffd.txt"
+    ],
+    "replacement_name_count": 2,
+    "status": "filename-collision",
+    "read_targets": [
+      "replacement-character-file",
+      "replacement-character-file"
+    ]
+  }
+}

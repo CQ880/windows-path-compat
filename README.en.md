@@ -55,6 +55,8 @@ python codex_regression.py --server $server --report codex-regression.json
 
 The report records the Codex version, path matrix, and filename collision result. Exit `0` means the ordinary paths passed and the check found no misleading filename, `1` means a path difference or misleading filename was observed, and `2` means the result was incomplete. Run `python examples/check_codex_paths.py --server $server --collision` to check the collision on its own.
 
-Official App Server 0.169.0 passed all ten ordinary path checks locally. On NTFS, a native filename with an unpaired UTF-16 surrogate was returned as U+FFFD, colliding with an existing name. Reading that name returned the other file's bytes. Dispatch the [Codex workflow](.github/workflows/codex-paths.yml) to verify this baseline on a hosted Windows runner using the pinned official release. [Upstream issue #60916](https://github.com/openai/codex/issues/60916)
+Official App Server 0.169.0 passed all ten ordinary path checks locally and on GitHub-hosted Windows Server 2025. Both runs reproduced the filename collision and wrong read. On NTFS, the server returned a filename with an unpaired UTF-16 surrogate as U+FFFD. When a real U+FFFD sibling existed, both records resolved to that sibling. The hosted workflow verified these expected results. [Hosted run](https://github.com/CQ880/windows-path-compat/actions/runs/43561072739) · [Hosted report](codex-regression-hosted-0.169.0.json) · [Upstream issue #60916](https://github.com/openai/codex/issues/60916)
+
+Push to the `codex-windows-probe` branch to trigger the [Codex workflow](.github/workflows/codex-paths.yml) and repeat the baseline with the pinned official release.
 
 This project uses the [MIT license](LICENSE).
