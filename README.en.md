@@ -46,15 +46,15 @@ Run the [Docling example workflow](.github/workflows/docling-pilot.yml) manually
 
 The [Codex probe](examples/check_codex_paths.py) calls `fs/readDirectory` and `fs/readFile` over local stdio with a temporary Codex configuration directory. Use the native Codex CLI or the standalone App Server on Windows. The filesystem requests require no account or API key. [App Server filesystem documentation](https://learn.chatgpt.com/docs/app-server#filesystem)
 
-Run from this repository in PowerShell. Set `$server` to the executable you want to test. If needed, pass an existing writable ASCII directory without spaces to `winpath.py` with `--root`.
+Run from this repository in PowerShell. Set `$server` to the executable you want to test. If the system temp path has spaces or non-ASCII characters, use `--root` to pass an existing writable path without them.
 
 ~~~powershell
 $server = (Resolve-Path 'C:/codex/codex-app-server-x86_64-pc-windows-msvc.exe').Path
-$probe = (Resolve-Path 'examples/check_codex_paths.py').Path
-python winpath.py --mode file --fixture examples/sample.txt --timeout 40 --json codex-paths.json -- python $probe --server $server --file '{input}'
-python $probe --server $server --collision
+python codex_regression.py --server $server --report codex-regression.json
 ~~~
 
-Official App Server 0.169.0 passed all ten ordinary file path checks. On a volume supporting these native names, the collision check creates two files. One name has an unpaired UTF-16 surrogate and the other contains U+FFFD. The tested server returned the same name for both, and reading that name loaded the U+FFFD file. The collision check returns `1` for a misleading name, `0` if the server rejects the listing or omits the unrepresentable entry, and `2` for an inconclusive run. [Upstream issue #60916](https://github.com/openai/codex/issues/60916)
+The report records the Codex version, path matrix, and filename collision result. Exit `0` means the ordinary paths passed and the check found no misleading filename, `1` means a path difference or misleading filename was observed, and `2` means the result was incomplete. Run `python examples/check_codex_paths.py --server $server --collision` to check the collision on its own.
+
+Official App Server 0.169.0 passed all ten ordinary path checks locally. On NTFS, a native filename with an unpaired UTF-16 surrogate was returned as U+FFFD, colliding with an existing name. Reading that name returned the other file's bytes. Dispatch the [Codex workflow](.github/workflows/codex-paths.yml) to verify this baseline on a hosted Windows runner using the pinned official release. [Upstream issue #60916](https://github.com/openai/codex/issues/60916)
 
 This project uses the [MIT license](LICENSE).

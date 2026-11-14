@@ -16,6 +16,12 @@ import time
 RPC_TIMEOUT_SECONDS = 10
 
 
+class RpcError(RuntimeError):
+    def __init__(self, error):
+        super().__init__(f"RPC {error['code']}: {error['message']}")
+        self.code = error["code"]
+
+
 class AppServer:
     def __init__(self, executable, home):
         env = os.environ.copy()
@@ -81,8 +87,7 @@ class AppServer:
 
 def result(response):
     if "error" in response:
-        error = response["error"]
-        raise RuntimeError(f"RPC {error['code']}: {error['message']}")
+        raise RpcError(response["error"])
     return response["result"]
 
 
@@ -101,9 +106,12 @@ def escape_names(names):
 
 def check_file(server, path):
     expected = path.read_bytes()
-    names = directory_names(server.call("fs/readDirectory", {"path": str(path.parent)}))
+    try:
+        names = directory_names(server.call("fs/readDirectory", {"path": str(path.parent)}))
+        content_matches = read_file(server, path) == expected
+    except RpcError as error:
+        return 1, {"status": "failed", "rpc_error_code": error.code}
     name_count = names.count(path.name)
-    content_matches = read_file(server, path) == expected
     code = int(name_count != 1 or not content_matches)
     return code, {
         "status": "failed" if code else "passed",

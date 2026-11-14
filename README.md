@@ -71,16 +71,16 @@ python winpath.py --mode file --fixture sample.pdf --json docling-result.json --
 
 [Codex 探针](examples/check_codex_paths.py) 通过本地 stdio 调用 `fs/readDirectory` 和 `fs/readFile`。在 Windows 上，用官方发行版的 App Server 或本机 Codex CLI 即可运行。探针使用临时配置目录，测试请求均在本地执行，无需账号或 API 密钥。 [Codex App Server 文档](https://learn.chatgpt.com/docs/app-server#filesystem)
 
-在工具目录中用 PowerShell 运行。先把 `$server` 改为已下载的可执行文件路径。默认临时目录不满足英文对照条件时，给 `winpath.py` 加上 `--root` 并指定已有的英文无空格目录。
+在工具目录中用 PowerShell 运行以下命令。把 `$server` 改为待测的 Codex 可执行文件路径。如果系统临时目录的路径含空格或非 ASCII 字符，用 `--root` 指定一个符合条件的可写目录。
 
 ~~~powershell
 $server = (Resolve-Path 'C:/codex/codex-app-server-x86_64-pc-windows-msvc.exe').Path
-$probe = (Resolve-Path 'examples/check_codex_paths.py').Path
-python winpath.py --mode file --fixture examples/sample.txt --timeout 40 --json codex-paths.json -- python $probe --server $server --file '{input}'
-python $probe --server $server --collision
+python codex_regression.py --server $server --report codex-regression.json
 ~~~
 
-官方 App Server 0.169.0 的常规路径矩阵通过 10/10。特殊用例在支持此类原生文件名的卷上创建两个文件，一个文件名包含未配对 UTF-16 代理码元，另一个包含 U+FFFD。测试版将两者列为同名，按返回名称读取会得到 U+FFFD 文件。碰撞用例退出码 `1` 表示发现误导性名称，`0` 表示接口明确拒绝该目录列表或省略了无法表示的条目，`2` 表示未获得可判定结果。 [上游 Issue #60916](https://github.com/openai/codex/issues/60916)
+报告包含 Codex 版本、常规路径结果和文件名冲突结果，可在核对内容后分享。退出码 `0` 表示常规路径均通过且未发现误导性文件名，`1` 表示发现路径差异或误导性文件名，`2` 表示结果不完整。可用 `python examples/check_codex_paths.py --server $server --collision` 单独测试冲突。
+
+官方 App Server 0.169.0 在本机通过全部 10 组常规路径。在 NTFS 上，一个含未配对 UTF-16 代理码元的原生文件名会被返回成 U+FFFD，与旁边的有效文件重名。按返回的名字读取会得到那个有效文件的内容。手动运行 [Codex 工作流](.github/workflows/codex-paths.yml) 可用固定的官方版本在 Windows runner 上验证这项基准。 [上游 Issue #60916](https://github.com/openai/codex/issues/60916)
 
 英文使用说明见 [README.en.md](README.en.md)。
 

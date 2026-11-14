@@ -1,0 +1,57 @@
+name: Codex App Server Windows paths
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    runs-on: windows-2025
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Download the pinned App Server
+        shell: pwsh
+        run: |
+          $name = 'codex-app-server-x86_64-pc-windows-msvc.exe'
+          $zip = Join-Path $env:RUNNER_TEMP "$name.zip"
+          $bin = Join-Path $env:RUNNER_TEMP 'codex-app-server-0.169.0'
+          $url = "https://github.com/openai/codex/releases/download/rust-v0.169.0/$name.zip"
+          Invoke-WebRequest -Uri $url -OutFile $zip -TimeoutSec 120
+          $expected = '74d7277580a00aa93c252f31794c3ad7dc3f61e7ae17874bc95796ef999b1e4e'
+          if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ine $expected) {
+            throw 'App Server archive checksum mismatch'
+          }
+          Expand-Archive -LiteralPath $zip -DestinationPath $bin
+          "CODEX_PATHS_EXE=$(Join-Path $bin $name)" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Verify the known filename regression
+        shell: pwsh
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $false
+          python codex_regression.py --server $env:CODEX_PATHS_EXE --root $env:RUNNER_TEMP
+          if ($LASTEXITCODE -ne 1) { throw 'Expected the pinned release to reproduce issue #60916' }
+          $report = Get-Content -Raw -LiteralPath 'codex-regression.json' | ConvertFrom-Json
+          $collision = $report.filename_collision
+          if ($report.server_version -ne 'codex-app-server 0.169.0' -or
+              $report.ordinary_paths.exit_code -ne 0 -or $report.ordinary_paths.cases.Count -ne 10 -or
+              $collision.exit_code -ne 1 -or $collision.status -ne 'filename-collision' -or
+              $collision.replacement_name_count -ne 2 -or -not $collision.single_file_control_passed -or
+              ($collision.read_targets -join ',') -ne 'replacement-character-file,replacement-character-file' -or
+              $collision.without_replacement_sibling.alias_read -ne 'rpc-error' -or
+              $collision.without_replacement_sibling.rpc_error_code -ne -32603) {
+            throw 'Expected ten passing ordinary paths and the verified filename alias'
+          }
+          exit 0
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: codex-regression-report
+          path: codex-regression.json
+          retention-days: 7
