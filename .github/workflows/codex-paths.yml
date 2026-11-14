@@ -2,6 +2,9 @@ name: Codex App Server Windows paths
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - codex-windows-probe
 
 permissions:
   contents: read
@@ -43,11 +46,31 @@ jobs:
               $report.ordinary_paths.exit_code -ne 0 -or $report.ordinary_paths.cases.Count -ne 10 -or
               $collision.exit_code -ne 1 -or $collision.status -ne 'filename-collision' -or
               $collision.replacement_name_count -ne 2 -or -not $collision.single_file_control_passed -or
+              ($collision.actual_names_escaped -join ',') -cne 'bad\ud800.txt,bad\ufffd.txt' -or
+              ($collision.returned_names_escaped -join ',') -cne 'bad\ufffd.txt,bad\ufffd.txt' -or
               ($collision.read_targets -join ',') -ne 'replacement-character-file,replacement-character-file' -or
+              ($collision.without_replacement_sibling.returned_names_escaped -join ',') -cne 'bad\ufffd.txt' -or
               $collision.without_replacement_sibling.alias_read -ne 'rpc-error' -or
               $collision.without_replacement_sibling.rpc_error_code -ne -32603) {
             throw 'Expected ten passing ordinary paths and the verified filename alias'
           }
+          $drive = [System.IO.DriveInfo]::new([System.IO.Path]::GetPathRoot($env:RUNNER_TEMP))
+          $summary = @"
+          ## Codex App Server Windows path check
+
+          Tested $($report.server_version) on $($report.platform) ($($report.machine), $($drive.DriveFormat)) with Python $($report.python_version).
+
+          | Case | Observed result |
+          | --- | --- |
+          | Ordinary paths | $($report.ordinary_paths.cases.Count)/10 passed with the exact filename and expected bytes |
+          | Real U+FFFD filename only | Read the expected bytes |
+          | Unpaired surrogate filename only | Listed a nonexistent U+FFFD filename. Reading it returned RPC error $($collision.without_replacement_sibling.rpc_error_code). |
+          | Both files with distinct contents | Listed the U+FFFD filename twice. Both reads returned the real U+FFFD file's bytes. |
+
+          The probe returned $($report.exit_code), confirming the expected reproduction of [openai/codex#60916](https://github.com/openai/codex/issues/60916).
+          "@
+          Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value $summary -Encoding utf8
+          Write-Output $summary
           exit 0
       - uses: actions/upload-artifact@v7
         if: always()
