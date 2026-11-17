@@ -4,7 +4,14 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - main
       - codex-windows-probe
+    paths:
+      - .github/workflows/codex-paths.yml
+      - codex_regression.py
+      - examples/check_codex_paths.py
+      - examples/sample.txt
+      - winpath.py
 
 permissions:
   contents: read
@@ -34,12 +41,12 @@ jobs:
           }
           Expand-Archive -LiteralPath $zip -DestinationPath $bin
           "CODEX_PATHS_EXE=$(Join-Path $bin $name)" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-      - name: Verify the known filename regression
+      - name: Verify both known Codex regressions
         shell: pwsh
         run: |
           $PSNativeCommandUseErrorActionPreference = $false
           python codex_regression.py --server $env:CODEX_PATHS_EXE --root $env:RUNNER_TEMP
-          if ($LASTEXITCODE -ne 1) { throw 'Expected the pinned release to reproduce issue #60916' }
+          if ($LASTEXITCODE -ne 1) { throw 'Expected the pinned release to reproduce the known regressions' }
           $report = Get-Content -Raw -LiteralPath 'codex-regression.json' | ConvertFrom-Json
           $collision = $report.filename_collision
           if ($report.server_version -ne 'codex-app-server 0.169.0' -or
@@ -54,6 +61,19 @@ jobs:
               $collision.without_replacement_sibling.rpc_error_code -ne -32603) {
             throw 'Expected ten passing ordinary paths and the verified filename alias'
           }
+          $search = $report.file_search
+          $queries = $search.queries
+          $composed = "caf$([char]0x00e9)-note.txt"
+          $decomposed = "cafe$([char]0x0301)-note.txt"
+          if ($search.exit_code -ne 1 -or $search.status -ne 'search-normalization-difference' -or
+              $search.same_results -ne $false -or $search.fixture_filenames.Count -ne 3 -or
+              $queries.ascii.matched_filenames.Count -ne 3 -or $queries.ascii.missing_filenames.Count -ne 0 -or
+              $queries.nfc.matched_filenames.Count -ne 1 -or $queries.nfc.missing_filenames.Count -ne 1 -or
+              -not [string]::Equals($queries.nfc.matched_filenames[0], $composed, [StringComparison]::Ordinal) -or
+              -not [string]::Equals($queries.nfc.missing_filenames[0], $decomposed, [StringComparison]::Ordinal) -or
+              $queries.nfd.matched_filenames.Count -ne 2 -or $queries.nfd.missing_filenames.Count -ne 0) {
+            throw 'Expected the ASCII control to find all files and the NFC query to miss the decomposed filename'
+          }
           $drive = [System.IO.DriveInfo]::new([System.IO.Path]::GetPathRoot($env:RUNNER_TEMP))
           $summary = @"
           ## Codex App Server Windows path check
@@ -66,8 +86,9 @@ jobs:
           | Real U+FFFD filename only | Read the expected bytes |
           | Unpaired surrogate filename only | Listed a nonexistent U+FFFD filename. Reading it returned RPC error $($collision.without_replacement_sibling.rpc_error_code). |
           | Both files with distinct contents | Listed the U+FFFD filename twice. Both reads returned the real U+FFFD file's bytes. |
+          | Equivalent accented file searches | The ASCII control found all three files. The NFC query found one and missed the decomposed filename. The NFD query found both accented filenames. |
 
-          The probe returned $($report.exit_code), confirming the expected reproduction of [openai/codex#60916](https://github.com/openai/codex/issues/60916).
+          The probe returned $($report.exit_code), confirming the expected reproductions of [openai/codex#60916](https://github.com/openai/codex/issues/60916) and [openai/codex#61022](https://github.com/openai/codex/issues/61022).
           "@
           Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY -Value $summary -Encoding utf8
           Write-Output $summary

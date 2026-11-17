@@ -1,4 +1,4 @@
-"""Run the Windows path matrix and issue #60916 check against one Codex build."""
+"""Run Windows path, filename, and search checks against one Codex build."""
 
 import argparse
 import json
@@ -72,18 +72,24 @@ def ordinary_paths(executable, scratch):
     return {"exit_code": exit_code, "cases": cases}
 
 
-def filename_collision(executable, scratch):
-    response = subprocess.run(
-        [sys.executable, str(PROBE), "--server", str(executable), "--collision"],
-        cwd=scratch, capture_output=True, encoding="utf-8", timeout=120,
-    )
-    if response.returncode not in (0, 1, 2):
-        raise ValueError(f"Unexpected exit code from the filename probe: {response.returncode}")
-    details = json.loads(response.stdout)
+def run_probe(executable, scratch, flag):
+    try:
+        response = subprocess.run(
+            [sys.executable, str(PROBE), "--server", str(executable), flag],
+            cwd=scratch, capture_output=True, encoding="utf-8", timeout=120,
+        )
+        if response.returncode not in (0, 1, 2):
+            raise ValueError(f"Unexpected exit code from the probe: {response.returncode}")
+        details = json.loads(response.stdout)
+        if not isinstance(details, dict):
+            raise ValueError("The probe did not return a JSON object")
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
+        print(f"Codex probe {flag}: {ascii(str(error))}", file=sys.stderr)
+        return {"exit_code": 2, "status": "probe-error"}
     error = details.pop("error", None)
     if error:
-        print(f"Filename probe: {ascii(error)}", file=sys.stderr)
-    return {"exit_code": response.returncode, **details}
+        print(f"Codex probe {flag}: {ascii(error)}", file=sys.stderr)
+    return {**details, "exit_code": response.returncode}
 
 
 def main():
@@ -120,9 +126,12 @@ def main():
             scratch = Path(directory)
             report["server_version"] = server_version(executable, scratch)
             report["ordinary_paths"] = ordinary_paths(executable, scratch)
-            report["filename_collision"] = filename_collision(executable, scratch)
+            report["filename_collision"] = run_probe(executable, scratch, "--collision")
+            report["file_search"] = run_probe(executable, scratch, "--search")
         report["exit_code"] = max(
-            report["ordinary_paths"]["exit_code"], report["filename_collision"]["exit_code"]
+            report["ordinary_paths"]["exit_code"],
+            report["filename_collision"]["exit_code"],
+            report["file_search"]["exit_code"],
         )
     except (OSError, ValueError, KeyError, TypeError, RuntimeError, subprocess.SubprocessError) as error:
         print(f"Codex regression check: {ascii(str(error))}", file=sys.stderr)

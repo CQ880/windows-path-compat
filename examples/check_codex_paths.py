@@ -1,4 +1,4 @@
-"""Check local Windows paths with Codex App Server's filesystem API."""
+"""Check local Windows paths and file search with Codex App Server."""
 
 import argparse
 import base64
@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 from threading import Thread
 import time
+import unicodedata
 
 
 RPC_TIMEOUT_SECONDS = 10
@@ -209,6 +210,46 @@ def check_collision(server, folder):
     return 2, {**details, "status": "unexpected-listing"}
 
 
+def check_search(server, folder):
+    nfc_query = "caf\u00e9"
+    nfd_query = unicodedata.normalize("NFD", nfc_query)
+    accented = {f"{nfc_query}-note.txt", f"{nfd_query}-note.txt"}
+    filenames = accented | {"cafe-plain.txt"}
+    for filename in filenames:
+        (folder / filename).write_bytes(b"search fixture\n")
+    if {entry.name for entry in folder.iterdir()} != filenames:
+        raise RuntimeError("Windows did not expose all three distinct search fixtures")
+
+    queries = {}
+    for form, query, expected in (
+        ("ascii", "cafe", filenames),
+        ("nfc", nfc_query, accented),
+        ("nfd", nfd_query, accented),
+    ):
+        response = result(server.call("fuzzyFileSearch", {
+            "query": query,
+            "roots": [str(folder)],
+        }))
+        matches = [entry["path"] for entry in response["files"]]
+        found = set(matches)
+        if not found <= filenames or len(found) != len(matches):
+            raise RuntimeError(f"Unexpected or duplicate path in {form} search results")
+        queries[form] = {
+            "query": query,
+            "matched_filenames": sorted(found),
+            "missing_filenames": sorted(expected - found),
+        }
+
+    nfc, nfd = queries["nfc"], queries["nfd"]
+    same_results = nfc["matched_filenames"] == nfd["matched_filenames"]
+    details = {"fixture_filenames": sorted(filenames), "queries": queries, "same_results": same_results}
+    if queries["ascii"]["missing_filenames"]:
+        return 2, {**details, "status": "ascii-control-failed"}
+    if not same_results or nfc["missing_filenames"] or nfd["missing_filenames"]:
+        return 1, {**details, "status": "search-normalization-difference"}
+    return 0, {**details, "status": "passed"}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -218,6 +259,7 @@ def main():
     case = parser.add_mutually_exclusive_group(required=True)
     case.add_argument("--file", type=Path, help="Read a synthetic file and verify its name and bytes")
     case.add_argument("--collision", action="store_true", help="Check the filename alias in issue #60916")
+    case.add_argument("--search", action="store_true", help="Check equivalent Unicode queries in issue #61022")
     args = parser.parse_args()
     try:
         if os.name != "nt":
@@ -232,12 +274,13 @@ def main():
                     "clientInfo": {"name": "windows-path-compat", "version": "1"}
                 }))
                 server.send({"method": "initialized"})
-                if args.collision:
+                if args.file is not None:
+                    code, details = check_file(server, args.file.resolve(strict=True))
+                else:
                     folder = root / "fixture"
                     folder.mkdir()
-                    code, details = check_collision(server, folder)
-                else:
-                    code, details = check_file(server, args.file.resolve(strict=True))
+                    check = check_search if args.search else check_collision
+                    code, details = check(server, folder)
     except (OSError, RuntimeError, ValueError, KeyError, TypeError) as error:
         code, details = 2, {"status": "probe-error", "error": str(error)}
     print(json.dumps(details, ensure_ascii=True))
