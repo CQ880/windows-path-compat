@@ -101,7 +101,6 @@
     ]
   },
   "filename_collision": {
-    "exit_code": 1,
     "actual_names_escaped": [
       "bad\\ud800.txt",
       "bad\\ufffd.txt"
@@ -123,6 +122,45 @@
     "read_targets": [
       "replacement-character-file",
       "replacement-character-file"
-    ]
+    ],
+    "exit_code": 1
+  },
+  "file_search": {
+    "fixture_filenames": [
+      "cafe-plain.txt",
+      "cafe\u0301-note.txt",
+      "caf\u00e9-note.txt"
+    ],
+    "queries": {
+      "ascii": {
+        "query": "cafe",
+        "matched_filenames": [
+          "cafe-plain.txt",
+          "cafe\u0301-note.txt",
+          "caf\u00e9-note.txt"
+        ],
+        "missing_filenames": []
+      },
+      "nfc": {
+        "query": "caf\u00e9",
+        "matched_filenames": [
+          "caf\u00e9-note.txt"
+        ],
+        "missing_filenames": [
+          "cafe\u0301-note.txt"
+        ]
+      },
+      "nfd": {
+        "query": "cafe\u0301",
+        "matched_filenames": [
+          "cafe\u0301-note.txt",
+          "caf\u00e9-note.txt"
+        ],
+        "missing_filenames": []
+      }
+    },
+    "same_results": false,
+    "status": "search-normalization-difference",
+    "exit_code": 1
   }
 }

@@ -2,6 +2,8 @@
 
 Run an existing test command across Windows paths with spaces, Chinese characters, accented Latin characters, or a mix of Chinese characters and spaces. The tool uses the Python standard library. The local test environment is native Windows x64 with Python 3.12.14.
 
+To reproduce the Codex filename or search issues, see [Codex App Server regression checks](#codex-app-server-regression-checks).
+
 From this directory in PowerShell, run
 
 ~~~powershell
@@ -32,7 +34,7 @@ For GitHub Actions, check out the caller repository and set up Python 3.12 in a 
 Point the action at a fixture and test script checked into your repository.
 
 ~~~yaml
-- uses: CQ880/windows-path-compat@v0.1.0
+- uses: CQ880/windows-path-compat@v0.2.0
   with:
     mode: file
     fixture: examples/sample.txt
@@ -42,9 +44,9 @@ Point the action at a fixture and test script checked into your repository.
 
 Run the [Docling example workflow](.github/workflows/docling-pilot.yml) manually to compare versions 7.15.0 and 7.16.0 on Windows. It checks the parsed page count and the known path regression. Adapt the same pattern to test your own Windows builds.
 
-## Codex App Server path checks
+## Codex App Server regression checks
 
-The [Codex probe](examples/check_codex_paths.py) calls `fs/readDirectory` and `fs/readFile` over local stdio with a temporary Codex configuration directory. Use the native Codex CLI or the standalone App Server on Windows. The filesystem requests require no account or API key. [App Server filesystem documentation](https://learn.chatgpt.com/docs/app-server#filesystem)
+The [Codex probe](examples/check_codex_paths.py) calls the directory listing, file read, and file search APIs over local stdio. Use the native Codex CLI or standalone App Server on Windows. The probe uses synthetic files and a temporary configuration directory and needs no account or API key. [App Server documentation](https://learn.chatgpt.com/docs/app-server)
 
 Run from this repository in PowerShell. Set `$server` to the executable you want to test. If the system temp path has spaces or non-ASCII characters, use `--root` to pass an existing writable path without them.
 
@@ -53,10 +55,16 @@ $server = (Resolve-Path 'C:/codex/codex-app-server-x86_64-pc-windows-msvc.exe').
 python codex_regression.py --server $server --report codex-regression.json
 ~~~
 
-The report records the Codex version, path matrix, and filename collision result. Exit `0` means the ordinary paths passed and the check found no misleading filename, `1` means a path difference or misleading filename was observed, and `2` means the result was incomplete. Run `python examples/check_codex_paths.py --server $server --collision` to check the collision on its own.
+The JSON report records the Codex version, case results, and the filenames each search query found or missed. Exit `0` means the checks passed, `1` indicates an observed path difference, and `2` indicates an incomplete run. Point the same command at a candidate executable to verify a fix.
 
-Official App Server 0.169.0 passed all ten ordinary path checks locally and on GitHub-hosted Windows Server 2025. Both runs reproduced the filename collision and wrong read. On NTFS, the server returned a filename with an unpaired UTF-16 surrogate as U+FFFD. When a real U+FFFD sibling existed, both records resolved to that sibling. The hosted workflow verified these expected results. [Hosted run](https://github.com/CQ880/windows-path-compat/actions/runs/43561072739) · [Hosted report](codex-regression-hosted-0.169.0.json) · [Upstream issue #60916](https://github.com/openai/codex/issues/60916)
+Official App Server 0.169.0 produced the same results locally and on GitHub-hosted Windows Server 2025.
 
-Push to the `codex-windows-probe` branch to trigger the [Codex workflow](.github/workflows/codex-paths.yml) and repeat the baseline with the pinned official release.
+| Check | Observed result |
+| --- | --- |
+| Ordinary file paths | 10/10 passed with the original filenames and contents. |
+| Filename collision | The server listed two distinct files under one name. Both reads returned the file containing U+FFFD in its name. [Codex #60916](https://github.com/openai/codex/issues/60916) |
+| Equivalent Unicode queries | The ASCII control found all 3 files. The precomposed query (NFC) found 1 accented filename, and the decomposed query (NFD) found 2. [Codex #61022](https://github.com/openai/codex/issues/61022) |
+
+Dispatch the workflow to replay the baseline against the pinned build. Run `python examples/check_codex_paths.py --server $server --search` to check search on its own. [Codex workflow](.github/workflows/codex-paths.yml) · [Hosted run](https://github.com/CQ880/windows-path-compat/actions/runs/44023836322) · [Hosted JSON](codex-regression-hosted-0.169.0.json)
 
 This project uses the [MIT license](LICENSE).

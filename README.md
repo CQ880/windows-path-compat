@@ -2,6 +2,8 @@
 
 用同一条测试命令检查 Windows 上的英文、空格、中文、重音字符以及中文与空格组合路径。已在原生 Windows x64 与 Python 3.12.14 实测。命令行工具使用 Python 标准库。
 
+测 Codex 的文件名错读或搜索漏报，可直接使用 [Codex App Server 回归检查](#codex-app-server-回归检查)。
+
 ## 快速开始
 
 在 PowerShell 中进入本目录后运行。需要将 `python` 替换成 Python 3.12 的绝对路径时，两处一起替换，并在第一处加 PowerShell 调用符 `&`。
@@ -55,7 +57,7 @@ python winpath.py --mode file --fixture sample.pdf --json docling-result.json --
 在 Windows job 中先 checkout 调用方仓库并配置 Python 3.12，再调用本 Action。测试脚本路径中的 `{workspace}` 由 Action 替换为调用方工作区。示例里的样例文件和测试脚本应位于调用方仓库中。在本仓库测试修改时，可用 `uses: ./`。
 
 ~~~yaml
-- uses: CQ880/windows-path-compat@v0.1.0
+- uses: CQ880/windows-path-compat@v0.2.0
   with:
     mode: file
     fixture: examples/sample.txt
@@ -67,9 +69,9 @@ python winpath.py --mode file --fixture sample.pdf --json docling-result.json --
 
 [Docling 示例工作流](.github/workflows/docling-pilot.yml) 可手动运行，在 Windows 上对照 7.15.0 和 7.16.0，验证 PDF 页数与路径差异。维护者可以用同样的接入方式检查自己发布的 Windows 构建。
 
-## Codex App Server 路径检查
+## Codex App Server 回归检查
 
-[Codex 探针](examples/check_codex_paths.py) 通过本地 stdio 调用 `fs/readDirectory` 和 `fs/readFile`。在 Windows 上，用官方发行版的 App Server 或本机 Codex CLI 即可运行。探针使用临时配置目录，测试请求均在本地执行，无需账号或 API 密钥。 [Codex App Server 文档](https://learn.chatgpt.com/docs/app-server#filesystem)
+[Codex 探针](examples/check_codex_paths.py) 通过本地 stdio 调用目录列表、文件读取和文件搜索接口。可使用官方 Windows App Server 或本机 Codex CLI。测试使用独立的临时配置和合成文件，无需账号或 API 密钥。 [Codex App Server 文档](https://learn.chatgpt.com/docs/app-server)
 
 在工具目录中用 PowerShell 运行以下命令。把 `$server` 改为待测的 Codex 可执行文件路径。如果系统临时目录的路径含空格或非 ASCII 字符，用 `--root` 指定一个符合条件的可写目录。
 
@@ -78,11 +80,17 @@ $server = (Resolve-Path 'C:/codex/codex-app-server-x86_64-pc-windows-msvc.exe').
 python codex_regression.py --server $server --report codex-regression.json
 ~~~
 
-报告包含 Codex 版本、常规路径结果和文件名冲突结果，可在核对内容后分享。退出码 `0` 表示常规路径均通过且未发现误导性文件名，`1` 表示发现路径差异或误导性文件名，`2` 表示结果不完整。可用 `python examples/check_codex_paths.py --server $server --collision` 单独测试冲突。
+JSON 报告包含 Codex 版本、逐组结果及各搜索查询命中和遗漏的文件。退出码 `0` 表示所测项目通过，`1` 表示观测到路径差异，`2` 表示结果不完整。替换服务器路径后可用同一条命令验证候选修复。
 
-官方 App Server 0.169.0 在本机和 GitHub 托管的 Windows Server 2025 上均通过 10 组常规路径。两次测试均复现了同名和错读。在 NTFS 上，含未配对 UTF-16 代理码元的文件名被返回成 U+FFFD。目录中存在同名的有效文件时，两条记录都会读到该有效文件。托管工作流核对了这些预期结果。 [托管运行](https://github.com/CQ880/windows-path-compat/actions/runs/43561072739) · [托管报告](codex-regression-hosted-0.169.0.json) · [上游 Issue #60916](https://github.com/openai/codex/issues/60916)
+官方 App Server 0.169.0 在本机和 GitHub 托管 Windows Server 2025 上结果一致。
 
-在 `codex-windows-probe` 分支推送代码可触发 [Codex 工作流](.github/workflows/codex-paths.yml)，用固定的官方发行版复跑这项基准。
+| 检查 | 实测结果 |
+| --- | --- |
+| 常规文件路径 | 10/10 通过，文件名和读取的字节一致。 |
+| 文件名错读 | 两个不同文件被列成同名，读取均落到含 U+FFFD 的文件。 [Codex #60916](https://github.com/openai/codex/issues/60916) |
+| 等价 Unicode 查询 | ASCII 查询找到全部 3 个文件。预组写法 NFC 仅找到 1 个带重音文件，分解写法 NFD 找到 2 个。 [Codex #61022](https://github.com/openai/codex/issues/61022) |
+
+可手动运行工作流，复跑固定版本的基准。也可单独执行 `python examples/check_codex_paths.py --server $server --search`，测搜索漏报。 [Codex 工作流](.github/workflows/codex-paths.yml) · [托管运行](https://github.com/CQ880/windows-path-compat/actions/runs/44023836322) · [托管 JSON 报告](codex-regression-hosted-0.169.0.json)
 
 英文使用说明见 [README.en.md](README.en.md)。
 
